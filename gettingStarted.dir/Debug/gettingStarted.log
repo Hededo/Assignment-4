@@ -1,1 +1,33 @@
-﻿
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (gettingStarted.dir\Debug\) contains files shared from another project (Assignment1.vcxproj, Assignment3.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Assignment4.cpp
+D:\Local Docs\Code\CS 5610\Assignment-4\include\vmath.h(1022): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(136): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(137): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(138): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(141): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(150): warning C4018: '<': signed/unsigned mismatch
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(152): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(161): warning C4018: '<': signed/unsigned mismatch
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(163): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(111): warning C4101: 'vertexIndex': unreferenced local variable
+d:\local docs\code\cs 5610\assignment-4\objObject.cpp(111): warning C4101: 'normalIndex': unreferenced local variable
+sb7_d.lib(sb7.obj) : warning LNK4099: PDB 'sb7.pdb' was not found with 'sb7_d.lib(sb7.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\sb7.pdb'; linking object as if no debug info
+sb7_d.lib(sb7shader.obj) : warning LNK4099: PDB 'sb7.pdb' was not found with 'sb7_d.lib(sb7shader.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\sb7.pdb'; linking object as if no debug info
+sb7_d.lib(gl3w.obj) : warning LNK4099: PDB 'sb7.pdb' was not found with 'sb7_d.lib(gl3w.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\sb7.pdb'; linking object as if no debug info
+glfw3_d.lib(context.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(context.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(gamma.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(gamma.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(init.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(init.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(input.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(input.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(monitor.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(monitor.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(time.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(time.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(window.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(window.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(win32_gamma.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(win32_gamma.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(win32_init.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(win32_init.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(win32_joystick.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(win32_joystick.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(win32_monitor.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(win32_monitor.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(win32_time.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(win32_time.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(win32_window.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(win32_window.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+glfw3_d.lib(wgl_context.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3_d.lib(wgl_context.obj)' or at 'D:\Local Docs\Code\CS 5610\Assignment-4\bin\glfw.pdb'; linking object as if no debug info
+  gettingStarted.vcxproj -> D:\Local Docs\Code\CS 5610\Assignment-4\bin\gettingStarted_d.exe

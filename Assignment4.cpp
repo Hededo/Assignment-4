@@ -30,39 +30,6 @@ static vmath::vec4 mult(vmath::mat4 m, vmath::vec4 v)
 		);
 }
 
-static vmath::mat4 ShadowMatrix(vmath::vec4 groundPlane, vmath::vec4 lightPos)
-{
-	GLfloat dot;
-	vmath::mat4 shadowMat;
-
-	dot = groundPlane[0] * lightPos[0] +
-		  groundPlane[1] * lightPos[1] +
-		  groundPlane[2] * lightPos[2] +
-		  groundPlane[3] * lightPos[3];
-
-	shadowMat[0][0] = dot - lightPos[0] + groundPlane[0];
-	shadowMat[1][0] = 0.0 - lightPos[0] + groundPlane[1];
-	shadowMat[2][0] = 0.0 - lightPos[0] + groundPlane[2];
-	shadowMat[3][0] = 0.0 - lightPos[0] + groundPlane[3];
-
-	shadowMat[0][1] = 0.0 - lightPos[1] * groundPlane[0];
-	shadowMat[1][1] = dot - lightPos[1] * groundPlane[1];
-	shadowMat[2][1] = 0.0 - lightPos[1] * groundPlane[2];
-	shadowMat[3][1] = 0.0 - lightPos[1] * groundPlane[3];
-
-	shadowMat[0][2] = 0.0 - lightPos[2] * groundPlane[0];
-	shadowMat[1][2] = 0.0 - lightPos[2] * groundPlane[1];
-	shadowMat[2][2] = dot - lightPos[2] * groundPlane[2];
-	shadowMat[3][2] = 0.0 - lightPos[2] * groundPlane[3];
-
-	shadowMat[0][3] = 0.0 - lightPos[3] * groundPlane[0];
-	shadowMat[1][3] = 0.0 - lightPos[3] * groundPlane[1];
-	shadowMat[2][3] = 0.0 - lightPos[3] * groundPlane[2];
-	shadowMat[3][3] = dot - lightPos[3] * groundPlane[3];
-
-	return shadowMat;
-}
-
 class assignment4_app : public sb7::application
 {
 
@@ -72,9 +39,7 @@ public:
 	assignment4_app()
 		: per_fragment_program(0),
 		flatColorProgram(0),
-		floorProgram(0),
-		projectedShadowProgram(0),
-		shadowMapProgram(0)
+		floorProgram(0) 
 	{
 	}
 #pragma endregion
@@ -110,8 +75,6 @@ protected:
 	GLuint          per_fragment_program;
 	GLuint          flatColorProgram;
 	GLuint          floorProgram;
-	GLuint          projectedShadowProgram;
-	GLuint          shadowMapProgram;
 
 	GLuint          tex_floor;
 
@@ -128,7 +91,6 @@ protected:
 		vmath::mat4     view_matrix;
 		vmath::mat4     light_view_matrix;
 		vmath::mat4     proj_matrix;
-		vmath::mat4     shadow_matrix;
 		vmath::mat4		depthMVP;
 		vmath::vec4     uni_color;
 		vmath::vec4     lightPos;
@@ -201,8 +163,6 @@ private:
 
 	// Offset move location cube with sphere
 	vmath::vec3 lightPosOffset = vmath::vec3(0, 0, 0);
-
-	bool projectedShadows = false;
 
 	struct planesStruct
 	{
@@ -287,25 +247,6 @@ void assignment4_app::startup()
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, floor_width, floor_height);
 	// Assume the texture is already bound to the GL_TEXTURE_2D target
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, floor_width, floor_height, GL_RGBA, GL_UNSIGNED_BYTE, &floorTexture[0]);
-#pragma endregion
-
-#pragma region Shadow Map stuff
-	glGenFramebuffers(1, &depthBuffer);
-	//glBindFramebuffer(GL_FRAMEBUFFER, depthBuffer);
-
-	glGenTextures(1, &depthTexture);
-	glBindTexture(GL_TEXTURE_2D, depthTexture);
-	glTexStorage2D(GL_TEXTURE_2D, 11, GL_DEPTH_COMPONENT32F, DEPTH_TEXTURE_SIZE, DEPTH_TEXTURE_SIZE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
-
-	glGenVertexArrays(1, &quad_vao);
-	glBindVertexArray(quad_vao);
-
 #pragma endregion
 
 #pragma region OPENGL Settings
@@ -449,17 +390,14 @@ void assignment4_app::render(double currentTime)
 	cube->Draw();
 #pragma endregion
 
-	glEnable(GL_STENCIL_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#pragma region Draw Teapot Stand Shadow
+#pragma region Draw Stand
 	cube->BindBuffers();
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
 
-	glUseProgram(projectedShadowProgram);
+	glUseProgram(per_fragment_program);
 
 	model_matrix =
 		vmath::translate(-15.0f, -19.7f, -5.0f) *
@@ -471,41 +409,18 @@ void assignment4_app::render(double currentTime)
 	block->uni_color = orange;
 	block->useUniformColor = trueVec;
 	block->invertNormals = falseVec;
-	block->shadow_matrix = ShadowMatrix(planes->Floor, mult(light_view_matrix, lightPos));
-
-	if (projectedShadows) {
-		cube->Draw();
-	}
-
-#pragma endregion
-	glDisable(GL_BLEND);
-	glDisable(GL_STENCIL_TEST);
-
-#pragma region Draw Stand
-	cube->BindBuffers();
-
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
-	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
-
-	glUseProgram(per_fragment_program);
 
 	glDisable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	cube->Draw();
 #pragma endregion
 
-	glEnable(GL_STENCIL_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#pragma region Draw Teapot Shadow
+#pragma region Draw Teapot
+	glUseProgram(per_fragment_program);
 	teapot->BindBuffers();
-
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
-
-	glUseProgram(projectedShadowProgram);
 
 	model_matrix =
 		vmath::translate(-15.0f, -14.7f, -5.0f) *
@@ -517,37 +432,16 @@ void assignment4_app::render(double currentTime)
 	block->uni_color = purple;
 	block->useUniformColor = trueVec;
 	block->invertNormals = falseVec;
-	block->shadow_matrix = ShadowMatrix(planes->Floor, mult(light_view_matrix, lightPos));
-
-	if (projectedShadows) {
-		teapot->Draw();
-	}
-	
-#pragma endregion
-	glDisable(GL_BLEND);
-	glDisable(GL_STENCIL_TEST);
-
-#pragma region Draw Teapot
-	glUseProgram(per_fragment_program);
-	teapot->BindBuffers();
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
-	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
 
 	teapot->Draw();
 #pragma endregion
 
-	glEnable(GL_STENCIL_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#pragma region Draw Teapot Shadow
+#pragma region Draw tatoo free cube
 	cube->BindBuffers();
-
+	glUseProgram(per_fragment_program);
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
-
-	glUseProgram(projectedShadowProgram);
 
 	model_matrix =
 		vmath::translate(10.0f, -19.7f, 0.0f) *
@@ -558,22 +452,6 @@ void assignment4_app::render(double currentTime)
 	block->uni_color = white;
 	block->useUniformColor = trueVec;
 	block->invertNormals = falseVec;
-	block->shadow_matrix = ShadowMatrix(planes->Floor, mult(light_view_matrix, lightPos));
-
-	if (projectedShadows) {
-		cube->Draw();
-	}
-
-#pragma endregion
-	glDisable(GL_BLEND);
-	glDisable(GL_STENCIL_TEST);
-
-#pragma region Draw tatoo free cube
-	cube->BindBuffers();
-	glUseProgram(per_fragment_program);
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
-	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
 
 	cube->Draw();
 #pragma endregion
@@ -645,32 +523,6 @@ void assignment4_app::load_shaders()
 	glAttachShader(floorProgram, vs);
 	glAttachShader(floorProgram, fs);
 	glLinkProgram(floorProgram);
-
-	vs = sb7::shader::load("projectedShadow.vs.txt", GL_VERTEX_SHADER);
-	fs = sb7::shader::load("projectedShadow.fs.txt", GL_FRAGMENT_SHADER);
-
-	if (projectedShadowProgram)
-	{
-		glDeleteProgram(projectedShadowProgram);
-	}
-
-	projectedShadowProgram = glCreateProgram();
-	glAttachShader(projectedShadowProgram, vs);
-	glAttachShader(projectedShadowProgram, fs);
-	glLinkProgram(projectedShadowProgram);
-
-	vs = sb7::shader::load("shadowMap.vs.txt", GL_VERTEX_SHADER);
-	fs = sb7::shader::load("shadowMap.fs.txt", GL_FRAGMENT_SHADER);
-
-	if (shadowMapProgram)
-	{
-		glDeleteProgram(shadowMapProgram);
-	}
-
-	shadowMapProgram = glCreateProgram();
-	glAttachShader(shadowMapProgram, vs);
-	glAttachShader(shadowMapProgram, fs);
-	glLinkProgram(shadowMapProgram);
 }
 
 #pragma region Event Handlers
@@ -712,9 +564,6 @@ void assignment4_app::onKey(int key, int action)
 			break;
 		case 'S':
 			lightPosOffset[2] -= 1;
-			break;
-		case 'P':
-			projectedShadows = !projectedShadows;
 			break;
 		}
 	}

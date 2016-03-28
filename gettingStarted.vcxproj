@@ -273,10 +273,6 @@
     <Text Include="floor.vs.txt" />
     <Text Include="phong_perfragment.fs.txt" />
     <Text Include="phong_perfragment.vs.txt" />
-    <Text Include="projectedShadow.fs.txt" />
-    <Text Include="projectedShadow.vs.txt" />
-    <Text Include="shadowMap.fs.txt" />
-    <Text Include="shadowMap.vs.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lodepng.h" />
