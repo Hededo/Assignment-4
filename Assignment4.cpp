@@ -32,13 +32,11 @@ static vmath::vec4 mult(vmath::mat4 m, vmath::vec4 v)
 
 class assignment4_app : public sb7::application
 {
-
 //Forward Declaration of Public functions
 #pragma region protected
 public:
 	assignment4_app()
 		: per_fragment_program(0),
-		flatColorProgram(0),
 		floorProgram(0) 
 	{
 	}
@@ -73,7 +71,6 @@ protected:
 	void load_shaders();
 
 	GLuint          per_fragment_program;
-	GLuint          flatColorProgram;
 	GLuint          floorProgram;
 
 	GLuint          tex_floor;
@@ -89,17 +86,12 @@ protected:
 		vmath::mat4     mv_matrix;
 		vmath::mat4     model_matrix;
 		vmath::mat4     view_matrix;
-		vmath::mat4     light_view_matrix;
 		vmath::mat4     proj_matrix;
-		vmath::mat4		depthMVP;
 		vmath::vec4     uni_color;
 		vmath::vec4     lightPos;
 		vmath::vec4	    useUniformColor;
 		vmath::vec4	    invertNormals;
-		vmath::vec4	    colorPercent;
 	};
-
-	float           colorPercent = 0.2f;
 
 	GLuint          uniforms_buffer;
 
@@ -159,11 +151,8 @@ private:
 
 	// Initial light pos
 	vmath::vec4 initalLightPos = vmath::vec4(0.0f, 20.0f, -2.0f, 1.0f);
-	//vmath::vec4 initalLightPos = vmath::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Offset move location cube with sphere
-	vmath::vec3 lightPosOffset = vmath::vec3(0, 0, 0);
-
 	struct planesStruct
 	{
 		vmath::vec4     PosX;
@@ -328,45 +317,9 @@ void assignment4_app::render(double currentTime)
 
 #pragma region Uniforms that remain constant for all geometery
 	block->proj_matrix = perspective_matrix;
-	vmath::vec4 lightPos = vmath::vec4(initalLightPos[0] + lightPosOffset[0], initalLightPos[1] + lightPosOffset[1], initalLightPos[2] + lightPosOffset[2], 1.0f);
-	vmath::mat4 light_view_matrix = vmath::lookat(vmath::vec3(lightPos[0], lightPos[1], lightPos[2]),
-		vmath::vec3(0.0f, 0.0f, 0.0f),
-		vmath::vec3(0.0f, 1.0f, 0.0f));
-	block->light_view_matrix = light_view_matrix;
+	vmath::vec4 lightPos = vmath::vec4(initalLightPos[0], initalLightPos[1], initalLightPos[2], 1.0f);
 	block->lightPos = lightPos;
 
-	block->colorPercent = vmath::vec4(colorPercent, colorPercent, colorPercent, colorPercent);
-	
-	// Compute the MVP matrix from the light's point of view
-
-	vmath::mat4 light_proj_matrix = vmath::frustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 200.0f);
-	vmath::mat4 depthModelMatrix = vmath::mat4(1.0);
-	vmath::mat4 depthMVP = light_proj_matrix * light_view_matrix * depthModelMatrix;
-
-	// Send our transformation to the currently bound shader,
-	// in the "MVP" uniform
-	block->depthMVP = depthMVP;
-#pragma endregion
-
-#pragma region Draw Light Source
-	sphere->BindBuffers();
-
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
-	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
-
-	glUseProgram(flatColorProgram);
-
-	vmath::mat4 model_matrix =
-		vmath::translate(block->lightPos[0], block->lightPos[1], block->lightPos[2]);
-	block->model_matrix = model_matrix;
-	block->mv_matrix = view_matrix * model_matrix;
-	block->view_matrix = view_matrix;
-	block->uni_color = white;
-	block->useUniformColor = trueVec;
-	block->invertNormals = falseVec;
-
-	sphere->Draw();
 #pragma endregion
 
 #pragma region Draw Room
@@ -378,7 +331,7 @@ void assignment4_app::render(double currentTime)
 
 	glUseProgram(per_fragment_program);
 
-    model_matrix = vmath::scale(50.0f);
+    vmath::mat4 model_matrix = vmath::scale(50.0f);
 	block->model_matrix = model_matrix;
 	block->mv_matrix = view_matrix * model_matrix;
 	block->view_matrix = view_matrix;
@@ -400,8 +353,7 @@ void assignment4_app::render(double currentTime)
 	glUseProgram(per_fragment_program);
 
 	model_matrix =
-		vmath::translate(-15.0f, -19.7f, -5.0f) *
-		vmath::rotate(45.0f, 0.0f, 1.0f, 0.0f) *
+		vmath::translate(0.0f, -19.7f, -5.0f) *
 		vmath::scale(10.0f);
 	block->model_matrix = model_matrix;
 	block->mv_matrix = view_matrix * model_matrix;
@@ -415,15 +367,15 @@ void assignment4_app::render(double currentTime)
 	cube->Draw();
 #pragma endregion
 
-#pragma region Draw Teapot
+#pragma region Draw Sphere
 	glUseProgram(per_fragment_program);
-	teapot->BindBuffers();
+	sphere->BindBuffers();
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
 
 	model_matrix =
-		vmath::translate(-15.0f, -14.7f, -5.0f) *
+		vmath::translate(0.0f, -9.8f, -5.0f) *
 		vmath::rotate(225.0f, 0.0f, 1.0f, 0.0f) *
 		vmath::scale(5.0f);
 	block->model_matrix = model_matrix;
@@ -433,27 +385,7 @@ void assignment4_app::render(double currentTime)
 	block->useUniformColor = trueVec;
 	block->invertNormals = falseVec;
 
-	teapot->Draw();
-#pragma endregion
-
-#pragma region Draw tatoo free cube
-	cube->BindBuffers();
-	glUseProgram(per_fragment_program);
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
-	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
-
-	model_matrix =
-		vmath::translate(10.0f, -19.7f, 0.0f) *
-		vmath::scale(10.0f);
-	block->model_matrix = model_matrix;
-	block->mv_matrix = view_matrix * model_matrix;
-	block->view_matrix = view_matrix;
-	block->uni_color = white;
-	block->useUniformColor = trueVec;
-	block->invertNormals = falseVec;
-
-	cube->Draw();
+	sphere->Draw();
 #pragma endregion
 
 #pragma region Draw Floor
@@ -498,19 +430,6 @@ void assignment4_app::load_shaders()
 	glAttachShader(per_fragment_program, fs);
 	glLinkProgram(per_fragment_program);
 
-	vs = sb7::shader::load("flatColor.vs.txt", GL_VERTEX_SHADER);
-	fs = sb7::shader::load("flatColor.fs.txt", GL_FRAGMENT_SHADER);
-
-	if (flatColorProgram)
-	{
-		glDeleteProgram(flatColorProgram);
-	}
-
-	flatColorProgram = glCreateProgram();
-	glAttachShader(flatColorProgram, vs);
-	glAttachShader(flatColorProgram, fs);
-	glLinkProgram(flatColorProgram);
-
 	vs = sb7::shader::load("floor.vs.txt", GL_VERTEX_SHADER);
 	fs = sb7::shader::load("floor.fs.txt", GL_FRAGMENT_SHADER);
 
@@ -545,25 +464,6 @@ void assignment4_app::onKey(int key, int action)
 			fXpos = 0.0f;
 			fYpos = 0.0f;
 			fZpos = 75.0f;
-			lightPosOffset = vmath::vec3(0, 0, 0);
-			break;
-		case '1':
-			lightPosOffset[0] += 1;
-			break;
-		case '2':
-			lightPosOffset[0] -= 1;
-			break;
-		case 'Q':
-			lightPosOffset[1] += 1;
-			break;
-		case 'W':
-			lightPosOffset[1] -= 1;
-			break;
-		case 'A':
-			lightPosOffset[2] += 1;
-			break;
-		case 'S':
-			lightPosOffset[2] -= 1;
 			break;
 		}
 	}

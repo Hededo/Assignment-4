@@ -267,8 +267,6 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="flatColor.fs.txt" />
-    <Text Include="flatColor.vs.txt" />
     <Text Include="floor.fs.txt" />
     <Text Include="floor.vs.txt" />
     <Text Include="phong_perfragment.fs.txt" />

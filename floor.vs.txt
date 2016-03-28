@@ -11,9 +11,7 @@ layout (std140) uniform constants
     mat4 mv_matrix;		
 	mat4 model_matrix;												
 	mat4 view_matrix;	
-	mat4 light_view_matrix;											
 	mat4 proj_matrix;
-	mat4 depthMVP;											
 	vec4 uni_color;		
 	vec4 light_pos;									     		
 	vec4 useUniformColor;	
@@ -33,30 +31,23 @@ out VS_OUT
 
 void main(void)
 {
-	vec4 adjustedNormal = normal;
+vec4 adjustedNormal = normal;
 	if (invertNormals.x == 1.0) 
 	{
 	   adjustedNormal = -normal; //invert normals for the inner cube
 	}
 		           
     // Calculate view-space coordinate
-    vec4 P = model_matrix * position;
-	//vec4 P = mv_matrix * position;
+    vec4 P = mv_matrix * position;
 
     // Calculate normal in view-space
-    vs_out.N = mat3(model_matrix * light_view_matrix) * adjustedNormal.xyz;
-
-	//My light hacks
-	vec4 worldLight = light_view_matrix * light_pos;
-	vec4 LP = light_view_matrix * model_matrix * position;
+    vs_out.N = mat3(mv_matrix) * adjustedNormal.xyz;
 
     // Calculate light vector
-    vs_out.L = worldLight.xyz - LP.xyz;
-	//vs_out.L = light_pos.xyz - P.xyz;
+	vs_out.L = light_pos.xyz - P.xyz;
 
     // Calculate view vector
-    //vs_out.V = -P.xyz;
-	vs_out.V = -LP.xyz;
+    vs_out.V = -P.xyz;
 
     vs_out.color = attributeColor.xyz;
 	
@@ -68,7 +59,5 @@ void main(void)
 	vs_out.tc = position.xz;
 
     // Calculate the clip-space position of each vertex
-    gl_Position = proj_matrix * view_matrix * P;
-
-	
+    gl_Position = proj_matrix * P;
 }
