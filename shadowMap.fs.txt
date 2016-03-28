@@ -1,0 +1,19 @@
+#version 410 core
+
+// Output
+//layout (location = 0) out vec4 color;
+layout(location = 1) out float fragmentdepth;
+
+// Input from vertex shader
+in VS_OUT
+{
+    vec3 N;
+    vec3 L;
+    vec3 V;
+	vec3 color;
+} fs_in;
+
+void main(){
+    // Not really needed, OpenGL does it anyway
+    fragmentdepth = gl_FragCoord.z;
+}

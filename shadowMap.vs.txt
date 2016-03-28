@@ -1,0 +1,33 @@
+#version 410 core
+
+// Per-vertex inputs
+layout (location = 0) in vec4 position;                          
+layout (location = 1) in vec4 normal;
+layout (location = 2) in vec4 attributeColor;  
+
+// Matrices we'll need
+layout (std140) uniform constants
+{
+    mat4 mv_matrix;	
+	mat4 model_matrix;													
+	mat4 view_matrix;	
+	mat4 light_view_matrix;											
+	mat4 proj_matrix;
+	mat4 shadow_matrix;	
+	mat4 depthMVP;											
+	vec4 uni_color;		
+	vec4 light_pos;									     		
+	vec4 useUniformColor;	
+	vec4 invertNormals;
+	vec4 colorPercent;
+};
+
+// Outputs to Fragment Shader
+out VS_OUT
+{
+	vec3 color;
+} vs_out;
+
+void main(){
+ gl_Position =  depthMVP * position;
+}

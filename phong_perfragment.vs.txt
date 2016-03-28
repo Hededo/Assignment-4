@@ -1,0 +1,70 @@
+#version 410 core
+
+// Per-vertex inputs
+layout (location = 0) in vec4 position;                          
+layout (location = 1) in vec4 normal;
+layout (location = 2) in vec4 attributeColor;  
+
+// Matrices we'll need
+layout (std140) uniform constants
+{
+    mat4 mv_matrix;	
+	mat4 model_matrix;													
+	mat4 view_matrix;	
+	mat4 light_view_matrix;											
+	mat4 proj_matrix;
+	mat4 shadow_matrix;	
+	mat4 depthMVP;											
+	vec4 uni_color;		
+	vec4 light_pos;									     		
+	vec4 useUniformColor;	
+	vec4 invertNormals;
+	vec4 colorPercent;
+};
+
+// Outputs to Fragment Shader
+out VS_OUT
+{
+    vec3 N;
+    vec3 L;
+    vec3 V;
+	vec3 color;
+} vs_out;
+
+void main(void)
+{
+	vec4 adjustedNormal = normal;
+	if (invertNormals.x == 1.0) 
+	{
+	   adjustedNormal = -normal; //invert normals for the inner cube
+	}
+		           
+    // Calculate view-space coordinate
+    vec4 P = model_matrix * position;
+	//vec4 P = mv_matrix * position;
+
+    // Calculate normal in view-space
+    vs_out.N = mat3(model_matrix * light_view_matrix) * adjustedNormal.xyz;
+
+	//My light hacks
+	vec4 worldLight = light_view_matrix * light_pos;
+	vec4 LP = light_view_matrix * model_matrix * position;
+
+    // Calculate light vector
+    vs_out.L = worldLight.xyz - LP.xyz;
+	//vs_out.L = light_pos.xyz - P.xyz;
+
+    // Calculate view vector
+    //vs_out.V = -P.xyz;
+	vs_out.V = -LP.xyz;
+
+    vs_out.color = attributeColor.xyz;
+	
+	if (useUniformColor.x == 1)								
+    {                               				
+      vs_out.color = uni_color.xyz;		
+	}    
+
+    // Calculate the clip-space position of each vertex
+    gl_Position = proj_matrix * view_matrix * P;
+}
