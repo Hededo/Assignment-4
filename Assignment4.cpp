@@ -374,7 +374,7 @@ void assignment4_app::render(double currentTime)
 	glUseProgram(floorProgram);
 	glBindTexture(GL_TEXTURE_2D, tex_brick);
 
-    vmath::mat4 model_matrix = vmath::scale(50.0f);
+    vmath::mat4 model_matrix = vmath::scale(30.0f);
 	block->model_matrix = model_matrix;
 	block->mv_matrix = view_matrix * model_matrix;
 	block->view_matrix = view_matrix;
@@ -396,8 +396,8 @@ void assignment4_app::render(double currentTime)
 	glUseProgram(per_fragment_program);
 
 	model_matrix =
-		vmath::translate(0.0f, -19.7f, -5.0f) *
-		vmath::scale(10.0f);
+		vmath::translate(-10.0f, -25.0f, -5.0f) *
+		vmath::scale(5.0f);
 	block->model_matrix = model_matrix;
 	block->mv_matrix = view_matrix * model_matrix;
 	block->view_matrix = view_matrix;
@@ -418,8 +418,7 @@ void assignment4_app::render(double currentTime)
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
 
 	model_matrix =
-		vmath::translate(0.0f, -9.8f, -5.0f) *
-		vmath::rotate(225.0f, 0.0f, 1.0f, 0.0f) *
+		vmath::translate(-10.0f, -15.0f, -5.0f) * 
 		vmath::scale(5.0f);
 	block->model_matrix = model_matrix;
 	block->mv_matrix = view_matrix * model_matrix;
@@ -442,8 +441,8 @@ void assignment4_app::render(double currentTime)
 	glBindTexture(GL_TEXTURE_2D, tex_floor);
 
 	model_matrix =
-		vmath::translate(0.0f, -24.9f, 0.0f) *
-		vmath::scale(50.0f, 0.0f, 50.0f);
+		vmath::translate(0.0f, -30.0f, 0.0f) *
+		vmath::scale(30.0f, 1.0f, 30.0f);
 	block->model_matrix = model_matrix;
 	block->mv_matrix = view_matrix * model_matrix;
 	block->view_matrix = view_matrix;

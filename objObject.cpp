@@ -84,10 +84,10 @@ public:
 		glEnableVertexAttribArray(1); //enable or disable a generic vertex attribute array
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0); //define an array of generic vertex attribute data void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid * pointer)
 
-		glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 		glEnableVertexAttribArray(2); //enable or disable a generic vertex attribute array
 		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, 0); //define an array of generic vertex attribute data void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid * pointer)
-		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
 		glEnableVertexAttribArray(3); //enable or disable a generic vertex attribute array
 		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 0, 0); //define an array of generic vertex attribute data void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid * pointer)
 	}
@@ -201,6 +201,8 @@ private:
 			vmath::vec2 valueAtIndex = objTextureCoor->at(index);
 			textureCoordinates->push_back(valueAtIndex[0]);
 			textureCoordinates->push_back(valueAtIndex[1]);
+			textureCoordinates->push_back(0);
+			textureCoordinates->push_back(0);
 		}
 
 		for (int i = 0; i < faceNormalIndex->size(); i++)
