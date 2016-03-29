@@ -43,18 +43,21 @@ public:
 	std::string fileName;
 	std::vector<GLfloat> * verticies;
 	std::vector<GLfloat> * normals;
+	std::vector<GLfloat> * textureCoordinates;
 	GLuint vertexCount;
 
 	GLuint vao;
 	GLuint vertexbuffer;
 	GLuint colorBuffer;
 	GLuint normalsBuffer;
+	GLuint textureBuffer;
 
 	ObjObject::ObjObject(std::string _fileName)
 	{
 		fileName = _fileName;
 		verticies = new std::vector<GLfloat>;
 		normals = new std::vector<GLfloat>;
+		textureCoordinates = new std::vector<GLfloat>;
 		vertexCount = 0;
 		CreateFromFile();
 	}
@@ -63,8 +66,10 @@ public:
 	{
 		delete(verticies);
 		delete(normals);
+		delete(textureCoordinates);
 		verticies = NULL;
 		normals = NULL;
+		textureCoordinates = NULL;
 	}
 
 	void ObjObject::BindBuffers()
@@ -79,9 +84,12 @@ public:
 		glEnableVertexAttribArray(1); //enable or disable a generic vertex attribute array
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0); //define an array of generic vertex attribute data void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid * pointer)
 
-		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
 		glEnableVertexAttribArray(2); //enable or disable a generic vertex attribute array
 		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, 0); //define an array of generic vertex attribute data void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid * pointer)
+		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+		glEnableVertexAttribArray(3); //enable or disable a generic vertex attribute array
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 0, 0); //define an array of generic vertex attribute data void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid * pointer)
 	}
 
 	void ObjObject::Draw()
@@ -97,9 +105,13 @@ private:
 
 		std::vector<vmath::vec3> * objVecticies = new std::vector<vmath::vec3>;
 		std::vector<vmath::vec3> * objNormals = new std::vector<vmath::vec3>;
+		std::vector<vmath::vec2> * objTextureCoor = new std::vector<vmath::vec2>;
 
 		std::vector<GLfloat> * faceVerticiesIndex = new std::vector<GLfloat>;
 		std::vector<GLfloat> * faceNormalIndex = new std::vector<GLfloat>;
+		std::vector<GLfloat> * faceTextureIndex = new std::vector<GLfloat>;
+
+		bool hasTextureCoor = false;
 
 		while (std::getline(file, line))
 		{
@@ -117,6 +129,15 @@ private:
 				objVecticies->push_back(vmath::vec3(std::stof(a), std::stof(b), std::stof(c)));
 				continue;
 			}
+
+			matches = (std::strcmp(firstWord.c_str(), "vt")) == 0;
+			if (matches)
+			{
+				hasTextureCoor = true;
+				stream >> a >> b;
+				objTextureCoor->push_back(vmath::vec2(std::stof(a), std::stof(b)));
+				continue;
+			}
 			matches = (std::strcmp(firstWord.c_str(), "vn")) == 0;
 			if (matches)
 			{
@@ -132,13 +153,29 @@ private:
 				vert1 = IntsInString(b);
 				vert2 = IntsInString(c);
 
-				//Decrement each index by 1 because OBJ indexs start at 1, not 0 like c++
-				faceVerticiesIndex->push_back(vert0.at(0) - 1);
-				faceNormalIndex->push_back(vert0.at(1) - 1);
-				faceVerticiesIndex->push_back(vert1.at(0) - 1);
-				faceNormalIndex->push_back(vert1.at(1) - 1);
-				faceVerticiesIndex->push_back(vert2.at(0) - 1);
-				faceNormalIndex->push_back(vert2.at(1) - 1);
+				if (!hasTextureCoor)
+				{
+					//Decrement each index by 1 because OBJ indexs start at 1, not 0 like c++
+					faceVerticiesIndex->push_back(vert0.at(0) - 1);
+					faceNormalIndex->push_back(vert0.at(1) - 1);
+					faceVerticiesIndex->push_back(vert1.at(0) - 1);
+					faceNormalIndex->push_back(vert1.at(1) - 1);
+					faceVerticiesIndex->push_back(vert2.at(0) - 1);
+					faceNormalIndex->push_back(vert2.at(1) - 1);
+				}
+				else
+				{
+					faceVerticiesIndex->push_back(vert0.at(0) - 1);
+					faceTextureIndex->push_back(vert0.at(1) - 1);
+					faceNormalIndex->push_back(vert0.at(2) - 1);
+					faceVerticiesIndex->push_back(vert1.at(0) - 1);
+					faceTextureIndex->push_back(vert1.at(1) - 1);
+					faceNormalIndex->push_back(vert1.at(2) - 1);
+					faceVerticiesIndex->push_back(vert2.at(0) - 1);
+					faceTextureIndex->push_back(vert2.at(1) - 1);
+					faceNormalIndex->push_back(vert2.at(2) - 1);
+				}
+				
 				continue;
 			}
 			else
@@ -158,6 +195,14 @@ private:
 			vertexCount += 1;
 		}
 
+		for (int i = 0; i < faceTextureIndex->size(); i++)
+		{
+			int index = faceTextureIndex->at(i);
+			vmath::vec2 valueAtIndex = objTextureCoor->at(index);
+			textureCoordinates->push_back(valueAtIndex[0]);
+			textureCoordinates->push_back(valueAtIndex[1]);
+		}
+
 		for (int i = 0; i < faceNormalIndex->size(); i++)
 		{
 			int index = faceNormalIndex->at(i);
@@ -171,19 +216,23 @@ private:
 
 		delete(objVecticies);
 		delete(objNormals);
+		delete(objTextureCoor);
 		delete(faceVerticiesIndex);
 		delete(faceNormalIndex);
+		delete(faceTextureIndex);
 
 		objVecticies = NULL;
 		objNormals = NULL;
+		objTextureCoor = NULL;
 		faceVerticiesIndex = NULL;
 		faceNormalIndex = NULL;
+		faceTextureIndex = NULL;
 
 		glGenVertexArrays(1, &vao);  //glGenVertexArrays(n, &array) returns n vertex array object names in arrays
 		glBindVertexArray(vao); //glBindVertexArray(array) binds the vertex array object with name array.
 
 		GLuint bufferSize = verticies->size() * sizeof(GLfloat);
-#pragma region Cube Pos Buffer
+#pragma region Pos Buffer
 		glGenBuffers(1, &vertexbuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 		glBufferData(GL_ARRAY_BUFFER,
@@ -193,7 +242,7 @@ private:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 #pragma endregion
 
-#pragma region Cube Color Buffer
+#pragma region Color Buffer
 		glGenBuffers(1, &colorBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 		glBufferData(GL_ARRAY_BUFFER,
@@ -203,7 +252,7 @@ private:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 #pragma endregion
 
-#pragma region Cube Normals Buffer
+#pragma region Normals Buffer
 		glGenBuffers(1, &normalsBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
 		glBufferData(GL_ARRAY_BUFFER,
@@ -212,5 +261,19 @@ private:
 			GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 #pragma endregion
+
+		if (textureCoordinates->size() > 0)
+		{
+#pragma region Texture Buffer
+			glGenBuffers(1, &textureBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
+			glBufferData(GL_ARRAY_BUFFER,
+				bufferSize,
+				textureCoordinates->data(),
+				GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+#pragma endregion
+		}
+
 	}
 };

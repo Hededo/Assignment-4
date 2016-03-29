@@ -1,16 +1,2 @@
 ﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (gettingStarted.dir\Debug\) contains files shared from another project (Assignment1.vcxproj, Assignment3.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  Assignment4.cpp
-C:\VersionedCode\Assignment-4\include\vmath.h(1022): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\versionedcode\assignment-4\objObject.cpp(136): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\versionedcode\assignment-4\objObject.cpp(137): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\versionedcode\assignment-4\objObject.cpp(138): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\versionedcode\assignment-4\objObject.cpp(139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\versionedcode\assignment-4\objObject.cpp(140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\versionedcode\assignment-4\objObject.cpp(141): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\versionedcode\assignment-4\objObject.cpp(150): warning C4018: '<': signed/unsigned mismatch
-c:\versionedcode\assignment-4\objObject.cpp(152): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-c:\versionedcode\assignment-4\objObject.cpp(161): warning C4018: '<': signed/unsigned mismatch
-c:\versionedcode\assignment-4\objObject.cpp(163): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-c:\versionedcode\assignment-4\objObject.cpp(111): warning C4101: 'vertexIndex': unreferenced local variable
-c:\versionedcode\assignment-4\objObject.cpp(111): warning C4101: 'normalIndex': unreferenced local variable
-  gettingStarted.vcxproj -> C:\VersionedCode\Assignment-4\bin\gettingStarted_d.exe
+  gettingStarted.vcxproj -> D:\Local Docs\Code\CS 5610\Assignment-4\bin\gettingStarted_d.exe

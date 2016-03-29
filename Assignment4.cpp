@@ -282,7 +282,6 @@ void assignment4_app::startup()
 #pragma endregion
 
 #pragma region OPENGL Settings
-
 	glEnable(GL_TEXTURE_2D);
     glFrontFace(GL_CW); //glFrontFace(GLenum mode) In a scene composed entirely of opaque closed surfaces, back-facing polygons are never visible.
 	glEnable(GL_DEPTH_TEST); //glEnable(GLenum cap) glEnable and glDisable enable and disable various capabilities.
@@ -375,7 +374,7 @@ void assignment4_app::render(double currentTime)
 	glUseProgram(floorProgram);
 	glBindTexture(GL_TEXTURE_2D, tex_brick);
 
-    vmath::mat4 model_matrix = vmath::rotate(90.0f, 1.0f, 0.0f, 0.0f) * vmath::scale(50.0f);
+    vmath::mat4 model_matrix = vmath::scale(50.0f);
 	block->model_matrix = model_matrix;
 	block->mv_matrix = view_matrix * model_matrix;
 	block->view_matrix = view_matrix;
@@ -444,7 +443,7 @@ void assignment4_app::render(double currentTime)
 
 	model_matrix =
 		vmath::translate(0.0f, -24.9f, 0.0f) *
-		vmath::scale(50.0f, 1.0f, 50.0f);
+		vmath::scale(50.0f, 0.0f, 50.0f);
 	block->model_matrix = model_matrix;
 	block->mv_matrix = view_matrix * model_matrix;
 	block->view_matrix = view_matrix;
