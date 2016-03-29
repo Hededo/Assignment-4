@@ -58,7 +58,7 @@ vec4 adjustedNormal = normal;
 	}    
 
 	//vs_out.tc = position.xz;
-	vs_out.tc = textureCoordinate.xy;
+	vs_out.tc = vec2(textureCoordinate.x * 8, textureCoordinate.y * 8);
 	
 
     // Calculate the clip-space position of each vertex
