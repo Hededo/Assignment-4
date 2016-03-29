@@ -412,7 +412,10 @@ void assignment4_app::render(double currentTime)
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
 
 	glUseProgram(wallProgram);
+	glUniform1i(tex_brick, 0);
+	glUniform1i(tex_brick_normal, 1);
 	glBindTexture(GL_TEXTURE_2D, tex_brick);
+	//glBindTexture(GL_TEXTURE_2D, tex_brick_normal);
 
     vmath::mat4 model_matrix = vmath::scale(30.0f);
 	block->model_matrix = model_matrix;
