@@ -37,7 +37,8 @@ class assignment4_app : public sb7::application
 public:
 	assignment4_app()
 		: per_fragment_program(0),
-		floorProgram(0) 
+		floorProgram(0) ,
+		wallProgram(0)
 	{
 	}
 #pragma endregion
@@ -72,9 +73,11 @@ protected:
 
 	GLuint          per_fragment_program;
 	GLuint          floorProgram;
+	GLuint          wallProgram;
 
 	GLuint          tex_floor;
 	GLuint          tex_brick;
+	GLuint          tex_brick_normal;
 
 	GLuint          depthBuffer;
 	GLuint          depthTexture;
@@ -238,10 +241,8 @@ void assignment4_app::startup()
 	// Assume the texture is already bound to the GL_TEXTURE_2D target
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, floor_width, floor_height, GL_RGBA, GL_UNSIGNED_BYTE, &floorTexture[0]);
 
-
-	//____________________________________________
 	std::vector<unsigned char> brickImage;
-	std::string brinkFilePath = "bin\\media\\textures\\brick.png";
+	std::string brinkFilePath = "bin\\media\\textures\\AlternatingBrick-ColorMap.png";
 
 	error = lodepng::decode(brickImage, floor_width, floor_height, brinkFilePath);
 
@@ -278,6 +279,45 @@ void assignment4_app::startup()
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, floor_width, floor_height);
 	// Assume the texture is already bound to the GL_TEXTURE_2D target
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, floor_width, floor_height, GL_RGBA, GL_UNSIGNED_BYTE, &brickTexture[0]);
+
+	std::vector<unsigned char> brickNormalImage;
+	std::string brinkNormalFilePath = "bin\\media\\textures\\AlternatingBrick-NormalMap.png";
+
+	error = lodepng::decode(brickNormalImage, floor_width, floor_height, brinkNormalFilePath);
+
+	if (error != 0)
+	{
+		std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
+		return;
+	}
+
+	// Texture size must be power of two for the primitive OpenGL version this is written for. Find next power of two.
+	u2 = 1; while (u2 < floor_width) u2 *= 2;
+	v2 = 1; while (v2 < floor_height) v2 *= 2;
+	// Ratio for power of two version compared to actual version, to render the non power of two image with proper size.
+	u3 = (double)floor_width / u2;
+	v3 = (double)floor_height / v2;
+
+	// Make power of two version of the image.
+	std::vector<unsigned char> brickNormalTexture(u2 * v2 * 4);
+	for (size_t y = 0; y < floor_height; y++)
+		for (size_t x = 0; x < floor_width; x++)
+			for (size_t c = 0; c < 4; c++)
+			{
+				brickNormalTexture[4 * u2 * y + 4 * x + c] = brickNormalImage[4 * floor_width * y + 4 * x + c];
+			}
+
+	// Enable the texture for OpenGL.
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST); //GL_NEAREST = no smoothing
+
+																					  // Generate a name for the texture
+	glGenTextures(1, &tex_brick_normal); //GLuint tex_brick
+								  // Now bind it to the context using the GL_TEXTURE_2D binding point
+	glBindTexture(GL_TEXTURE_2D, tex_brick_normal);
+	// Specify the amount of storage we want to use for the texture
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, floor_width, floor_height);
+	// Assume the texture is already bound to the GL_TEXTURE_2D target
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, floor_width, floor_height, GL_RGBA, GL_UNSIGNED_BYTE, &brickNormalTexture[0]);
 
 #pragma endregion
 
@@ -371,7 +411,7 @@ void assignment4_app::render(double currentTime)
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
 
-	glUseProgram(floorProgram);
+	glUseProgram(wallProgram);
 	glBindTexture(GL_TEXTURE_2D, tex_brick);
 
     vmath::mat4 model_matrix = vmath::scale(30.0f);
@@ -484,6 +524,19 @@ void assignment4_app::load_shaders()
 	glAttachShader(floorProgram, vs);
 	glAttachShader(floorProgram, fs);
 	glLinkProgram(floorProgram);
+
+	vs = sb7::shader::load("wall.vs.txt", GL_VERTEX_SHADER);
+	fs = sb7::shader::load("wall.fs.txt", GL_FRAGMENT_SHADER);
+
+	if (wallProgram)
+	{
+		glDeleteProgram(wallProgram);
+	}
+
+	wallProgram = glCreateProgram();
+	glAttachShader(wallProgram, vs);
+	glAttachShader(wallProgram, fs);
+	glLinkProgram(wallProgram);
 }
 
 #pragma region Event Handlers

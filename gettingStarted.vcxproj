@@ -271,6 +271,8 @@
     <Text Include="floor.vs.txt" />
     <Text Include="phong_perfragment.fs.txt" />
     <Text Include="phong_perfragment.vs.txt" />
+    <Text Include="wall.fs.txt" />
+    <Text Include="wall.vs.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lodepng.h" />

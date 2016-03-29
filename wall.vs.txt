@@ -1,0 +1,66 @@
+#version 410 core
+
+// Per-vertex inputs
+layout (location = 0) in vec4 position;                        
+layout (location = 1) in vec4 normal;
+layout (location = 2) in vec4 attributeColor;  
+layout (location = 3) in vec4 textureCoordinate;  
+
+// Matrices we'll need
+layout (std140) uniform constants
+{
+    mat4 mv_matrix;		
+	mat4 model_matrix;												
+	mat4 view_matrix;	
+	mat4 proj_matrix;
+	vec4 uni_color;		
+	vec4 light_pos;									     		
+	vec4 useUniformColor;	
+	vec4 invertNormals;
+	vec4 colorPercent;
+};
+
+// Outputs to Fragment Shader
+out VS_OUT
+{
+    vec3 N;
+    vec3 L;
+    vec3 V;
+	vec3 color;
+	vec2 tc;
+} vs_out;
+
+void main(void)
+{
+vec4 adjustedNormal = normal;
+	if (invertNormals.x == 1.0) 
+	{
+	   adjustedNormal = -normal; //invert normals for the inner cube
+	}
+		           
+    // Calculate view-space coordinate
+    vec4 P = mv_matrix * position;
+
+    // Calculate normal in view-space
+    vs_out.N = mat3(mv_matrix) * adjustedNormal.xyz;
+
+    // Calculate light vector
+	vs_out.L = light_pos.xyz - P.xyz;
+
+    // Calculate view vector
+    vs_out.V = -P.xyz;
+
+    vs_out.color = attributeColor.xyz;
+	
+	if (useUniformColor.x == 1)								
+    {                               				
+      vs_out.color = uni_color.xyz;		
+	}    
+
+	//vs_out.tc = position.xz;
+	vs_out.tc = vec2(textureCoordinate.x * 8, textureCoordinate.y * 8);
+	
+
+    // Calculate the clip-space position of each vertex
+    gl_Position = proj_matrix * P;
+}
