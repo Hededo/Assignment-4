@@ -3,6 +3,20 @@
 // Output
 layout (location = 0) out vec4 color;
 
+// Matrices we'll need
+layout (std140) uniform constants
+{
+    mat4 mv_matrix;		
+	mat4 model_matrix;												
+	mat4 view_matrix;	
+	mat4 proj_matrix;
+	vec4 uni_color;		
+	vec4 light_pos;									     		
+	vec4 useUniformColor;	
+	vec4 invertNormals;
+	vec4 colorPercent;
+};
+
 // Input from vertex shader
 in VS_OUT
 {
@@ -19,12 +33,16 @@ uniform vec3 specular_albedo = vec3(0.7);
 uniform float specular_power = 128.0;
 uniform vec3 ambient = vec3(0.2, 0.2, 0.2);
 
-uniform sampler2D texture1;
+uniform sampler2D colorTexture;
+uniform sampler2D normalTexture;
 
 void main(void)
 {
     // Normalize the incoming N, L and V vectors
-    vec3 N = normalize(fs_in.N);
+
+	//vec4 normal = texture2D(normalTexture, fs_in.tc);
+    //vec3 N = mat3(mv_matrix) * texture2D(normalTexture, fs_in.tc).xyz; //normalize(fs_in.N);
+	vec3 N = normalize(fs_in.N);
     vec3 L = normalize(fs_in.L);
     vec3 V = normalize(fs_in.V);
 
@@ -36,6 +54,9 @@ void main(void)
     vec3 specular = pow(max(dot(R, V), 0.0), specular_power) * specular_albedo;
 
     // Write final color to the framebuffer
-	color =  vec4( (ambient + diffuse + specular) * texture(texture1, fs_in.tc).xyz, 1.0);	
+	//color =  vec4( (ambient + diffuse + specular) * texture(normalTexture, fs_in.tc).xyz, 1.0);
+
+	color = vec4( (ambient + diffuse + specular) * texture2D(colorTexture, fs_in.tc).xyz, 1.0);
+	
 	//color = vec4(color, 1.0);
 }

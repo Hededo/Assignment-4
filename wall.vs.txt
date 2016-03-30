@@ -30,6 +30,7 @@ out VS_OUT
 	vec2 tc;
 } vs_out;
 
+
 void main(void)
 {
 vec4 adjustedNormal = normal;
@@ -50,7 +51,7 @@ vec4 adjustedNormal = normal;
     // Calculate view vector
     vs_out.V = -P.xyz;
 
-    vs_out.color = attributeColor.xyz;
+    vs_out.color = position.xyz;
 	
 	if (useUniformColor.x == 1)								
     {                               				

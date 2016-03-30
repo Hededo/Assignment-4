@@ -411,9 +411,20 @@ void assignment4_app::render(double currentTime)
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
 
+	GLint tex_brick_location = glGetUniformLocation(wallProgram, "colorTexture");
+	GLint bump_tex_location = glGetUniformLocation(wallProgram, "normalTexture");
+
 	glUseProgram(wallProgram);
-	glUniform1i(tex_brick, 0);
-	glUniform1i(tex_brick_normal, 1);
+	glUniform1i(tex_brick_location, 1);
+	glUniform1i(bump_tex_location, 0);
+
+	glBindTexture(GL_TEXTURE_2D, tex_brick);
+	glActiveTexture(GL_TEXTURE0 + 0); // Texture unit 0
+	glBindTexture(GL_TEXTURE_2D, tex_brick_normal);
+	glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
+	
+
+
 	glBindTexture(GL_TEXTURE_2D, tex_brick);
 	//glBindTexture(GL_TEXTURE_2D, tex_brick_normal);
 
@@ -481,6 +492,7 @@ void assignment4_app::render(double currentTime)
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
 
 	glUseProgram(floorProgram);
+	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_2D, tex_floor);
 
 	model_matrix =
