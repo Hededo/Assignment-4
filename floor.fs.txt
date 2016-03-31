@@ -28,9 +28,7 @@ in VS_OUT
 } fs_in;
 
 // Material properties
-uniform vec3 diffuse_albedo = vec3(0.2, 0.2, 0.2);
-uniform vec3 specular_albedo = vec3(0.7);
-uniform float specular_power = 128.0;
+uniform vec3 diffuse_albedo = vec3(0.4, 0.4, 0.4);
 
 uniform sampler2D colorTexture;
 uniform sampler2D normalTexture;
@@ -40,6 +38,7 @@ void main(void)
     // Normalize the incoming N, L and V vectors
     vec3 N = normalize(mat3(mv_matrix) * texture2D(normalTexture, fs_in.tc).xyz);
 	N = N.xzy;
+	N = (N-0.5) * 2.0; //changes the scale to -1, 1
     vec3 L = normalize(fs_in.L);
     vec3 V = normalize(fs_in.V);
 

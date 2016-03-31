@@ -45,10 +45,24 @@ void main(void)
 
 	vec3 N = vec3(0,0,0);
 
-	if (vertexNormal.z > 0)
+	bool xIsLargest = (vertexNormal.x > vertexNormal.y) && (vertexNormal.x > vertexNormal.z);
+	bool yIsLargest = (vertexNormal.y > vertexNormal.x) && (vertexNormal.y > vertexNormal.z);
+	bool zIsLargest = (vertexNormal.z > vertexNormal.x) && (vertexNormal.z > vertexNormal.y);
+
+	if (xIsLargest)
 	{
-		N.z = bumpNormal.z;
+		N = bumpNormal.zyx;
 	}
+	else if (yIsLargest)
+	{
+		N = bumpNormal.xzy;
+	}
+	else if (zIsLargest)
+	{
+		N = bumpNormal.xyz;
+	}
+
+	N = bumpNormal.xyz;
 
     vec3 L = normalize(fs_in.L);
     vec3 V = normalize(fs_in.V);
@@ -66,7 +80,7 @@ void main(void)
 
 	color = vec4( (ambient + diffuse + specular) * texture2D(colorTexture, fs_in.tc).xyz, 1.0);
 	
-	//color = vec4(N, 1.0);
+	color = vec4(N, 1.0);
 
 	//color = vec4(vertexNormal, 1.0);
 

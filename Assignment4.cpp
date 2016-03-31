@@ -133,6 +133,7 @@ const vmath::vec4 trueVec = vmath::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 ObjObject * cube;
 ObjObject * sphere;
 ObjObject * teapot;
+ObjObject * quad;
 
 #pragma endregion
 
@@ -155,7 +156,7 @@ private:
 	float fZpos = 75.0f;
 
 	// Initial light pos
-	vmath::vec4 initalLightPos = vmath::vec4(0.0f, 20.0f, -2.0f, 1.0f);
+	vmath::vec4 initalLightPos = vmath::vec4(1.0f, 1.0f, -3.0f, 1.0f);
 
 	// Offset move location cube with sphere
 	struct planesStruct
@@ -183,6 +184,7 @@ void assignment4_app::startup()
 	cube = new ObjObject("bin\\media\\objects\\cube.obj");
 	sphere = new ObjObject("bin\\media\\objects\\sphere.obj");
 	teapot = new ObjObject("bin\\media\\objects\\wt_teapot.obj");
+	quad = new ObjObject("bin\\media\\objects\\quad.obj");
 
 	planes = new planesStruct();
 	planes->PosX = vmath::vec4( 1.0f, 0.0f, 0.0f, 1.0f);
@@ -462,11 +464,6 @@ void assignment4_app::render(double currentTime)
 	glActiveTexture(GL_TEXTURE0 + 0); // Texture unit 0
 	glBindTexture(GL_TEXTURE_2D, tex_brick_normal);
 	glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
-	
-
-
-	glBindTexture(GL_TEXTURE_2D, tex_brick);
-	//glBindTexture(GL_TEXTURE_2D, tex_brick_normal);
 
     vmath::mat4 model_matrix = vmath::scale(30.0f);
 	block->model_matrix = model_matrix;
