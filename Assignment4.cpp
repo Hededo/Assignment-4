@@ -76,6 +76,7 @@ protected:
 	GLuint          wallProgram;
 
 	GLuint          tex_floor;
+	GLuint          tex_floor_normal;
 	GLuint          tex_brick;
 	GLuint          tex_brick_normal;
 
@@ -240,6 +241,45 @@ void assignment4_app::startup()
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, floor_width, floor_height);
 	// Assume the texture is already bound to the GL_TEXTURE_2D target
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, floor_width, floor_height, GL_RGBA, GL_UNSIGNED_BYTE, &floorTexture[0]);
+
+	std::vector<unsigned char> floorNormalImage;
+	std::string floorNormalFilePath = "bin\\media\\textures\\floor_normal_map.png";
+
+	error = lodepng::decode(floorNormalImage, floor_width, floor_height, floorNormalFilePath);
+
+	if (error != 0)
+	{
+		std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
+		return;
+	}
+
+	// Texture size must be power of two for the primitive OpenGL version this is written for. Find next power of two.
+	u2 = 1; while (u2 < floor_width) u2 *= 2;
+	v2 = 1; while (v2 < floor_height) v2 *= 2;
+	// Ratio for power of two version compared to actual version, to render the non power of two image with proper size.
+	u3 = (double)floor_width / u2;
+	v3 = (double)floor_height / v2;
+
+	// Make power of two version of the image.
+	std::vector<unsigned char> floorNormalTexture(u2 * v2 * 4);
+	for (size_t y = 0; y < floor_height; y++)
+		for (size_t x = 0; x < floor_width; x++)
+			for (size_t c = 0; c < 4; c++)
+			{
+				floorNormalTexture[4 * u2 * y + 4 * x + c] = floorNormalImage[4 * floor_width * y + 4 * x + c];
+			}
+
+	// Enable the texture for OpenGL.
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST); //GL_NEAREST = no smoothing
+
+																					  // Generate a name for the texture
+	glGenTextures(1, &tex_floor_normal); //GLuint tex_floor_normal
+								  // Now bind it to the context using the GL_TEXTURE_2D binding point
+	glBindTexture(GL_TEXTURE_2D, tex_floor_normal);
+	// Specify the amount of storage we want to use for the texture
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, floor_width, floor_height);
+	// Assume the texture is already bound to the GL_TEXTURE_2D target
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, floor_width, floor_height, GL_RGBA, GL_UNSIGNED_BYTE, &floorNormalTexture[0]);
 
 	std::vector<unsigned char> brickImage;
 	std::string brinkFilePath = "bin\\media\\textures\\AlternatingBrick-ColorMap.png";
@@ -491,9 +531,17 @@ void assignment4_app::render(double currentTime)
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
 
+	GLint tex_floor_location = glGetUniformLocation(floorProgram, "colorTexture");
+	GLint bump_floor_location = glGetUniformLocation(floorProgram, "normalTexture");
+
 	glUseProgram(floorProgram);
-	glActiveTexture(GL_TEXTURE0 + 0);
+	glUniform1i(tex_floor_location, 1);
+	glUniform1i(bump_floor_location, 0);
+
 	glBindTexture(GL_TEXTURE_2D, tex_floor);
+	glActiveTexture(GL_TEXTURE0 + 0); // Texture unit 0
+	glBindTexture(GL_TEXTURE_2D, tex_floor_normal);
+	glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
 
 	model_matrix =
 		vmath::translate(0.0f, -30.0f, 0.0f) *

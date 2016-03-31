@@ -1,2 +1,2 @@
 ﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (gettingStarted.dir\Debug\) contains files shared from another project (Assignment1.vcxproj, Assignment3.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  gettingStarted.vcxproj -> D:\Local Docs\Code\CS 5610\Assignment-4\bin\gettingStarted_d.exe
+  gettingStarted.vcxproj -> C:\VersionedCode\Assignment-4\bin\gettingStarted_d.exe
