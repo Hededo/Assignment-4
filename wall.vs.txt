@@ -30,7 +30,6 @@ out VS_OUT
 	vec2 tc;
 } vs_out;
 
-
 void main(void)
 {
 vec4 adjustedNormal = normal;

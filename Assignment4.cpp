@@ -202,7 +202,7 @@ void assignment4_app::startup()
 
 #pragma region Load Textures
 	std::vector<unsigned char> floorImage;
-	std::string floorFilePath = "bin\\media\\textures\\floor.png";
+	std::string floorFilePath = "bin\\media\\textures\\sand.png";
 
 	unsigned floor_width, floor_height;
 	unsigned error = lodepng::decode(floorImage, floor_width, floor_height, floorFilePath);
