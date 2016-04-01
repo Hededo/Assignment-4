@@ -36,9 +36,9 @@ uniform sampler2D normalTexture;
 void main(void)
 {
     // Normalize the incoming N, L and V vectors
-    vec3 N = normalize(mat3(mv_matrix) * texture2D(normalTexture, fs_in.tc).xyz);
+    vec3 N = texture2D(normalTexture, fs_in.tc).xyz;
 	N = N.xzy;
-	N = (N-0.5) * 2.0; //changes the scale to -1, 1
+	N = normalize((N-0.5) * 2.0); //changes the scale to -1, 1
     vec3 L = normalize(fs_in.L);
     vec3 V = normalize(fs_in.V);
 
@@ -48,6 +48,6 @@ void main(void)
     vec3 diffuse = max(dot(N, L), 0.0) * diffuse_albedo;
 
     // Write final color to the framebuffer
-	color =  vec4( diffuse * texture(colorTexture, fs_in.tc).xyz, 1.0);	
-	//color = vec4(color, 1.0);
+	//color =  vec4( diffuse * texture(colorTexture, fs_in.tc).xyz, 1.0);	
+	color = color;
 }

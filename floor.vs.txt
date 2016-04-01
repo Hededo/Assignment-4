@@ -42,7 +42,7 @@ vec4 adjustedNormal = normal;
     vec4 P = mv_matrix * position;
 
     // Calculate normal in view-space
-    vs_out.N = mat3(model_matrix) * adjustedNormal.xyz;
+    vs_out.N = vec3(model_matrix * adjustedNormal).xyz;
 
     // Calculate light vector
 	vs_out.L = light_pos.xyz - (model_matrix * position).xyz;

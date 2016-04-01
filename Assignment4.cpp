@@ -20,6 +20,45 @@
 #define DEPTH_TEXTURE_SIZE      4096
 #define FRUSTUM_DEPTH           1000
 
+void printShaderInfoLog(GLuint obj)
+{
+	int infologLength = 0;
+	int charsWritten = 0;
+	char *infoLog;
+
+	glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &infologLength);
+
+	if (infologLength > 0)
+	{
+		infoLog = (char *)malloc(infologLength);
+		glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
+		//printf("%s\n", infoLog);
+		OutputDebugString(infoLog);
+		free(infoLog);
+	}
+}
+
+
+void printProgramInfoLog(GLuint obj)
+{
+	int infologLength = 0;
+	int charsWritten = 0;
+	char *infoLog;
+
+	glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &infologLength);
+
+	if (infologLength > 0)
+	{
+		infoLog = (char *)malloc(infologLength);
+		glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
+		//printf("%s\n", infoLog);
+		OutputDebugString(infoLog);
+		free(infoLog);
+	}
+}
+
+
+
 static vmath::vec4 mult(vmath::mat4 m, vmath::vec4 v)
 {
 	return vmath::vec4(
@@ -604,7 +643,9 @@ void assignment4_app::load_shaders()
 	GLuint fs;
 
 	vs = sb7::shader::load("phong_perfragment.vs.txt", GL_VERTEX_SHADER);
+	printShaderInfoLog(vs);
 	fs = sb7::shader::load("phong_perfragment.fs.txt", GL_FRAGMENT_SHADER);
+	printShaderInfoLog(fs);
 
 	if (per_fragment_program)
 	{
@@ -643,7 +684,9 @@ void assignment4_app::load_shaders()
 	glLinkProgram(wallProgram);
 
 	vs = sb7::shader::load("toon.vs.txt", GL_VERTEX_SHADER);
+	printShaderInfoLog(vs);
 	fs = sb7::shader::load("toon.fs.txt", GL_FRAGMENT_SHADER);
+	printShaderInfoLog(fs);
 
 	if (toonProgram)
 	{
