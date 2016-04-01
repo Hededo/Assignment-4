@@ -87,4 +87,5 @@ void main(void)
     vec3 specular = pow(max(dot(R, V), 0.0), specular_power) * specular_albedo;
 
 	color = vec4( (ambient + diffuse + specular) * texture2D(colorTexture, fs_in.tc).xyz, 1.0); //The one I want
+	//color = vec4( vertexNormal, 1.0);
 }

@@ -9,7 +9,6 @@ in VS_OUT
     vec3 L;
     vec3 V;
 	vec3 color;
-	vec2 tc;
 } fs_in;
 
 struct ToonColors
@@ -40,34 +39,17 @@ void main(void)
 	float pi = 3.14;
 
 	float nDotV = dot (N, L);
-	float magN = length(N);
-	float magL = length(L);
-	 
-    float radians = acos( nDotV / (magN * magL)  );
-	float degrees = radians * (180 / pi);
 
-	if (degrees <= 100)
+    float radians = acos( abs(nDotV) );
+	float degrees = radians * (180.0 / pi);
+
+	if (degrees <= 10 && degrees >= 0)
 	{
 		color = colors.c0;
 	}
-	if (degrees <= 140)
+	else 
 	{
 		color = colors.c1;
 	}
-	if (degrees <= 180)
-	{
-		color = colors.c2;
-	}
-	if (degrees <= 220)
-	{
-		color = colors.c3;
-	}
-	if (degrees <= 260)
-	{
-		color = colors.c4;
-	}
-	if (degrees >  260)
-	{
-		color = colors.c5;
-	}
+	color = vec4(-N);
 }

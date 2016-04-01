@@ -27,18 +27,14 @@ out VS_OUT
     vec3 L;
     vec3 V;
 	vec3 color;
-	vec2 tc;
 } vs_out;
 
 void main(void)
 {
     vec4 P = mv_matrix * position;
 
-    vs_out.N = vec3(model_matrix * normal).xyz;
-    vs_out.V = -(model_matrix * position).xyz;
+    vs_out.N = (model_matrix * normal).xyz;
 	vs_out.L = light_pos.xyz - (model_matrix * position).xyz;
-	vs_out.color = vec3(0.0, 1.0, 0.0);
-	vs_out.tc = vec2(textureCoordinate.x, textureCoordinate.y);
 
     gl_Position = proj_matrix * P;
 }
