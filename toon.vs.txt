@@ -36,8 +36,8 @@ void main(void)
 
     vs_out.N = vec3(model_matrix * normal).xyz;
     vs_out.V = -(model_matrix * position).xyz;
-	vs_out.L = normalize(light_pos.xyz - (model_matrix * position).xyz);
-	vs_out.color = vec3(1.0, 1.0, 0.0);
+	vs_out.L = light_pos.xyz - (model_matrix * position).xyz;
+	vs_out.color = vec3(0.0, 1.0, 0.0);
 	vs_out.tc = vec2(textureCoordinate.x, textureCoordinate.y);
 
     gl_Position = proj_matrix * P;

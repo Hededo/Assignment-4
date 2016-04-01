@@ -122,7 +122,6 @@ protected:
 	GLuint          tex_floor_normal;
 	GLuint          tex_brick;
 	GLuint          tex_brick_normal;
-	GLuint          tex_toon;
 
 	GLuint          depthBuffer;
 	GLuint          depthTexture;
@@ -382,23 +381,6 @@ void assignment4_app::startup()
 	// Assume the texture is already bound to the GL_TEXTURE_2D target
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, floor_width, floor_height, GL_RGBA, GL_UNSIGNED_BYTE, &brickNormalTexture[0]);
 
-	static const GLubyte toon_tex_data[] =
-	{
-		0x22, 0x00, 0x00, 0x00,
-		0x44, 0x00, 0x00, 0x00,
-		0x88, 0x00, 0x00, 0x00,
-		0xCC, 0x00, 0x00, 0x00,
-		0xFF, 0x00, 0x00, 0x00
-	};
-
-	glGenTextures(1, &tex_toon);
-	glBindTexture(GL_TEXTURE_1D, tex_toon);
-	glTexStorage1D(GL_TEXTURE_1D, 1, GL_RGB8, sizeof(toon_tex_data) / 4);
-	glTexSubImage1D(GL_TEXTURE_1D, 0,
-		0, sizeof(toon_tex_data) / 4,
-		GL_RGBA, GL_UNSIGNED_BYTE,
-		toon_tex_data);
-
 #pragma endregion
 
 #pragma region OPENGL Settings
@@ -570,21 +552,6 @@ void assignment4_app::render(double currentTime)
 	if (toonShading)
 	{
 		glUseProgram(toonProgram);
-
-		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-
-		GLint tex_toon_location = glGetUniformLocation(toonProgram, "colorTexture");
-		GLint bump_toon_location = glGetUniformLocation(toonProgram, "normalTexture");
-
-		glUniform1i(tex_toon_location, 1);
-		glUniform1i(bump_toon_location, 0);
-
-		glBindTexture(GL_TEXTURE_2D, tex_toon);
-		glActiveTexture(GL_TEXTURE0 + 0); // Texture unit 0
-		glBindTexture(GL_TEXTURE_2D, tex_toon);
-		glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
 	}
 	else
 	{
@@ -732,6 +699,7 @@ void assignment4_app::onKey(int key, int action)
 			fXpos = 0.0f;
 			fYpos = 0.0f;
 			fZpos = 75.0f;
+			toonShading = false;
 			lightPosOffset = vmath::vec3(0, 0, 0);
 			break;
 		case 'T':

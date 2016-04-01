@@ -12,18 +12,62 @@ in VS_OUT
 	vec2 tc;
 } fs_in;
 
-uniform sampler2D colorTexture;
-uniform sampler2D normalTexture;
+struct ToonColors
+{
+	vec4 c0;
+	vec4 c1;
+	vec4 c2;
+	vec4 c3;
+	vec4 c4;
+	vec4 c5;
+};
 
 void main(void)
 {
+	ToonColors colors = ToonColors(
+	vec4(0.0, 0.0, 0.0, 1.0),
+	vec4(0.3, 0.0, 0.0, 1.0),
+	vec4(0.6, 0.0, 0.0, 1.0),
+	vec4(1.0, 0.0, 0.0, 1.0),
+	vec4(1.0, 0.5, 0.5, 1.0),
+	vec4(1.0, 1.0, 1.0, 1.0)
+	);	
+
     // Calculate per-pixel normal and light vector
     vec3 N = normalize(fs_in.N);
-    vec3 L = fs_in.L;
+    vec3 L = normalize(fs_in.L);
 
-    // Simple N dot L diffuse lighting
-    float tc = pow(max(0.0, dot(N, L)), 5.0);
+	float pi = 3.14;
 
-    // Sample from cell shading texture
-	color = texture2D(colorTexture, fs_in.tc);
+	float nDotV = dot (N, L);
+	float magN = length(N);
+	float magL = length(L);
+	 
+    float radians = acos( nDotV / (magN * magL)  );
+	float degrees = radians * (180 / pi);
+
+	if (degrees <= 100)
+	{
+		color = colors.c0;
+	}
+	if (degrees <= 140)
+	{
+		color = colors.c1;
+	}
+	if (degrees <= 180)
+	{
+		color = colors.c2;
+	}
+	if (degrees <= 220)
+	{
+		color = colors.c3;
+	}
+	if (degrees <= 260)
+	{
+		color = colors.c4;
+	}
+	if (degrees >  260)
+	{
+		color = colors.c5;
+	}
 }

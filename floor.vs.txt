@@ -32,7 +32,8 @@ out VS_OUT
 
 void main(void)
 {
-vec4 adjustedNormal = normal;
+	vec4 adjustedNormal = normal;
+
 	if (invertNormals.x == 1.0) 
 	{
 	   adjustedNormal = -normal; //invert normals for the inner cube

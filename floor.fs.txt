@@ -48,6 +48,5 @@ void main(void)
     vec3 diffuse = max(dot(N, L), 0.0) * diffuse_albedo;
 
     // Write final color to the framebuffer
-	//color =  vec4( diffuse * texture(colorTexture, fs_in.tc).xyz, 1.0);	
-	color = color;
+	color =  vec4( diffuse * texture(colorTexture, fs_in.tc).xyz, 1.0);	
 }
