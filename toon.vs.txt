@@ -34,8 +34,8 @@ void main(void)
 {
     vec4 P = mv_matrix * position;
 
-    vs_out.N = mat3(mv_matrix) * normal.xyz;
-    vs_out.V = P.xyz;
+    vs_out.N = mat3(model_matrix) * normal.xyz;
+    vs_out.V = -(model_matrix * position).xyz;
 	vs_out.L = normalize(light_pos.xyz - vs_out.V);
 	vs_out.color = vec3(1.0, 1.0, 0.0);
 	vs_out.tc = vec2(textureCoordinate.x, textureCoordinate.y);

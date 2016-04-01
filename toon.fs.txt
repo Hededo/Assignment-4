@@ -23,7 +23,7 @@ void main(void)
     float tc = pow(max(0.0, dot(N, L)), 5.0);
 
     // Sample from cell shading texture
-	color = texture2D(colorTexture, fs_in.tc);
+	//color = texture2D(colorTexture, fs_in.tc);
     //color = texture(colorTexture, tc) * (tc * 0.8 + 0.2);
-	//color = vec4(1.0, 1.0, 1.0, 1.0);
+	color = vec4(1.0, 1.0, 1.0, 1.0);
 }

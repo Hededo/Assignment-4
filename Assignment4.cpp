@@ -39,7 +39,8 @@ public:
 		: per_fragment_program(0),
 		floorProgram(0) ,
 		wallProgram(0),
-		toonProgram(0)
+		toonProgram(0),
+		flatColorProgram(0)
 	{
 	}
 #pragma endregion
@@ -76,6 +77,7 @@ protected:
 	GLuint          floorProgram;
 	GLuint          wallProgram;
 	GLuint          toonProgram;
+	GLuint          flatColorProgram;
 
 	GLuint          tex_floor;
 	GLuint          tex_floor_normal;
@@ -160,6 +162,7 @@ private:
 
 	// Initial light pos
 	vmath::vec4 initalLightPos = vmath::vec4(1.0f, 1.0f, -3.0f, 1.0f);
+	vmath::vec3 lightPosOffset = vmath::vec3(0, 0, 0);
 
 	bool toonShading = false;
 
@@ -438,7 +441,7 @@ void assignment4_app::render(double currentTime)
 #pragma region Uniforms that remain constant for all geometery
 	block->proj_matrix = perspective_matrix;
 	vmath::vec4 lightPos = vmath::vec4(initalLightPos[0], initalLightPos[1], initalLightPos[2], 1.0f);
-	block->lightPos = lightPos;
+	block->lightPos = vmath::vec4(initalLightPos[0] + lightPosOffset[0], initalLightPos[1] + lightPosOffset[1], initalLightPos[2] + lightPosOffset[2], 1.0f);
 
 #pragma endregion
 
@@ -495,6 +498,27 @@ void assignment4_app::render(double currentTime)
 	glDisable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	cube->Draw();
+#pragma endregion
+
+#pragma region Draw Light Source
+	sphere->BindBuffers();
+
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
+	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
+
+	glUseProgram(flatColorProgram);
+
+	model_matrix =
+		vmath::translate(block->lightPos[0], block->lightPos[1], block->lightPos[2]);
+	block->model_matrix = model_matrix;
+	block->mv_matrix = view_matrix * model_matrix;
+	block->view_matrix = view_matrix;
+	block->uni_color = white;
+	block->useUniformColor = trueVec;
+	block->invertNormals = falseVec;
+
+	sphere->Draw();
 #pragma endregion
 
 #pragma region Draw Sphere
@@ -630,6 +654,19 @@ void assignment4_app::load_shaders()
 	glAttachShader(toonProgram, vs);
 	glAttachShader(toonProgram, fs);
 	glLinkProgram(toonProgram);
+
+	vs = sb7::shader::load("flatColor.vs.txt", GL_VERTEX_SHADER);
+	fs = sb7::shader::load("flatColor.fs.txt", GL_FRAGMENT_SHADER);
+
+	if (flatColorProgram)
+	{
+		glDeleteProgram(flatColorProgram);
+	}
+
+	flatColorProgram = glCreateProgram();
+	glAttachShader(flatColorProgram, vs);
+	glAttachShader(flatColorProgram, fs);
+	glLinkProgram(flatColorProgram);
 }
 
 #pragma region Event Handlers
@@ -652,9 +689,28 @@ void assignment4_app::onKey(int key, int action)
 			fXpos = 0.0f;
 			fYpos = 0.0f;
 			fZpos = 75.0f;
+			lightPosOffset = vmath::vec3(0, 0, 0);
 			break;
 		case 'T':
 			toonShading = !toonShading;
+			break;
+		case '1':
+			lightPosOffset[0] += 1;
+			break;
+		case '2':
+			lightPosOffset[0] -= 1;
+			break;
+		case 'Q':
+			lightPosOffset[1] += 1;
+			break;
+		case 'W':
+			lightPosOffset[1] -= 1;
+			break;
+		case 'A':
+			lightPosOffset[2] += 1;
+			break;
+		case 'S':
+			lightPosOffset[2] -= 1;
 			break;
 		}
 	}

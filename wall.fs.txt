@@ -40,8 +40,7 @@ void main(void)
 {
     // Normalize the incoming N, L and V vectors
 
-    vec3 bumpNormal = normalize(mat3(mv_matrix) * texture2D(normalTexture, fs_in.tc).xyz);
-	//bumpNormal = (bumpNormal-0.5) * 2.0; //changes the scale to -1, 1
+    vec3 bumpNormal = texture2D(normalTexture, fs_in.tc).xyz;
 	vec3 vertexNormal = normalize(fs_in.N);
 
 	vec3 N = vec3(0,0,0);
@@ -50,48 +49,34 @@ void main(void)
 	float absY = abs(vertexNormal.y);
 	float absZ = abs(vertexNormal.z);
 
-	bool xIsLargest = (absX > absY) && (absX > absZ);
-	bool yIsLargest = (absY > absX) && (absY > absZ);
-	bool zIsLargest = (absZ > absX) && (absZ > absY);
+	if (absX == 1.0)
+	{
+		N = bumpNormal.zyx;
+		if (vertexNormal.x ==  -1.0)
+		{
+			N.x = -N.x;
+		}
+	}
+	else if (absY == 1.0)
+	{
+		N = bumpNormal.xzy;
+		if (vertexNormal.y ==  -1.0)
+		{
+			N.y = -N.y;
+		}
+	}
+	else if (absZ == 1.0)
+	{
+		N = bumpNormal.xyz;
+		if (vertexNormal.z ==  -1.0)
+		{
+			N.z = -N.z;
+		}
+	}
 
-	float bumpX = bumpNormal.x;
-	float bumpY = bumpNormal.y;
-	float bumpZ = bumpNormal.z;
+	N = normalize((N - 0.5) * 2);
 
-	if (xIsLargest)
-	{
-		if (vertexNormal.x > 0)
-		{
-			N = vec3( bumpZ, bumpY, bumpX);
-		}
-		else
-		{
-			N = vec3(-bumpZ, bumpY, bumpX);
-		}
-		
-	}
-	else if (yIsLargest)
-	{
-		if (vertexNormal.y > 0)
-		{
-			N = vec3(bumpX,  bumpZ, bumpY);
-		}
-		else
-		{
-			N = vec3(bumpX, -bumpZ, bumpY);
-		}
-	}
-	else if (zIsLargest)
-	{
-		if (vertexNormal.z > 0)
-		{
-			N = vec3(bumpX, bumpY,  bumpZ);
-		}
-		else
-		{
-			N = vec3(bumpX, bumpY, -bumpZ);
-		}
-	}
+	//N = vertexNormal;
 
     vec3 L = normalize(fs_in.L);
     vec3 V = normalize(fs_in.V);
