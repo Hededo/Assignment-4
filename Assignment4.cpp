@@ -38,7 +38,8 @@ public:
 	assignment4_app()
 		: per_fragment_program(0),
 		floorProgram(0) ,
-		wallProgram(0)
+		wallProgram(0),
+		toonProgram(0)
 	{
 	}
 #pragma endregion
@@ -74,11 +75,13 @@ protected:
 	GLuint          per_fragment_program;
 	GLuint          floorProgram;
 	GLuint          wallProgram;
+	GLuint          toonProgram;
 
 	GLuint          tex_floor;
 	GLuint          tex_floor_normal;
 	GLuint          tex_brick;
 	GLuint          tex_brick_normal;
+	GLuint          tex_toon;
 
 	GLuint          depthBuffer;
 	GLuint          depthTexture;
@@ -158,20 +161,7 @@ private:
 	// Initial light pos
 	vmath::vec4 initalLightPos = vmath::vec4(1.0f, 1.0f, -3.0f, 1.0f);
 
-	// Offset move location cube with sphere
-	struct planesStruct
-	{
-		vmath::vec4     PosX;
-		vmath::vec4     NegX;
-		vmath::vec4     PosY;
-		vmath::vec4     NegY;
-		vmath::vec4     PosZ;
-		vmath::vec4     NegZ;
-		vmath::vec4		Floor;
-		vmath::vec4		Wall;
-	};
-
-	planesStruct * planes;
+	bool toonShading = false;
 
 
 #pragma endregion
@@ -185,17 +175,6 @@ void assignment4_app::startup()
 	sphere = new ObjObject("bin\\media\\objects\\sphere.obj");
 	teapot = new ObjObject("bin\\media\\objects\\wt_teapot.obj");
 	quad = new ObjObject("bin\\media\\objects\\quad.obj");
-
-	planes = new planesStruct();
-	planes->PosX = vmath::vec4( 1.0f, 0.0f, 0.0f, 1.0f);
-	planes->NegX = vmath::vec4(-1.0f, 0.0f, 0.0f, 1.0f);
-	planes->PosY = vmath::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-	planes->NegY = vmath::vec4(0.0f, -1.0f, 0.0f, 1.0f);
-	planes->PosZ = vmath::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-	planes->NegZ = vmath::vec4(0.0f, 0.0f, -1.0f, 1.0f);
-	planes->Floor = vmath::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-	planes->Wall = vmath::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-
 
 #pragma region Buffer For Uniform Block
 	glGenBuffers(1, &uniforms_buffer);
@@ -361,6 +340,23 @@ void assignment4_app::startup()
 	// Assume the texture is already bound to the GL_TEXTURE_2D target
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, floor_width, floor_height, GL_RGBA, GL_UNSIGNED_BYTE, &brickNormalTexture[0]);
 
+	static const GLubyte toon_tex_data[] =
+	{
+		0x22, 0x00, 0x00, 0x00,
+		0x44, 0x00, 0x00, 0x00,
+		0x88, 0x00, 0x00, 0x00,
+		0xCC, 0x00, 0x00, 0x00,
+		0xFF, 0x00, 0x00, 0x00
+	};
+
+	glGenTextures(1, &tex_toon);
+	glBindTexture(GL_TEXTURE_1D, tex_toon);
+	glTexStorage1D(GL_TEXTURE_1D, 1, GL_RGB8, sizeof(toon_tex_data) / 4);
+	glTexSubImage1D(GL_TEXTURE_1D, 0,
+		0, sizeof(toon_tex_data) / 4,
+		GL_RGBA, GL_UNSIGNED_BYTE,
+		toon_tex_data);
+
 #pragma endregion
 
 #pragma region OPENGL Settings
@@ -502,11 +498,35 @@ void assignment4_app::render(double currentTime)
 #pragma endregion
 
 #pragma region Draw Sphere
-	glUseProgram(per_fragment_program);
+
 	sphere->BindBuffers();
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniforms_buffer);
 	block = (uniforms_block *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(uniforms_block), GL_MAP_WRITE_BIT);
+
+	if (toonShading)
+	{
+		glUseProgram(toonProgram);
+
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
+		GLint tex_toon_location = glGetUniformLocation(toonProgram, "colorTexture");
+		GLint bump_toon_location = glGetUniformLocation(toonProgram, "normalTexture");
+
+		glUniform1i(tex_toon_location, 1);
+		glUniform1i(bump_toon_location, 0);
+
+		glBindTexture(GL_TEXTURE_2D, tex_toon);
+		glActiveTexture(GL_TEXTURE0 + 0); // Texture unit 0
+		glBindTexture(GL_TEXTURE_2D, tex_toon);
+		glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
+	}
+	else
+	{
+		glUseProgram(per_fragment_program);
+	}
 
 	model_matrix =
 		vmath::translate(-10.0f, -15.0f, -5.0f) * 
@@ -597,6 +617,19 @@ void assignment4_app::load_shaders()
 	glAttachShader(wallProgram, vs);
 	glAttachShader(wallProgram, fs);
 	glLinkProgram(wallProgram);
+
+	vs = sb7::shader::load("toon.vs.txt", GL_VERTEX_SHADER);
+	fs = sb7::shader::load("toon.fs.txt", GL_FRAGMENT_SHADER);
+
+	if (toonProgram)
+	{
+		glDeleteProgram(toonProgram);
+	}
+
+	toonProgram = glCreateProgram();
+	glAttachShader(toonProgram, vs);
+	glAttachShader(toonProgram, fs);
+	glLinkProgram(toonProgram);
 }
 
 #pragma region Event Handlers
@@ -619,6 +652,9 @@ void assignment4_app::onKey(int key, int action)
 			fXpos = 0.0f;
 			fYpos = 0.0f;
 			fZpos = 75.0f;
+			break;
+		case 'T':
+			toonShading = !toonShading;
 			break;
 		}
 	}

@@ -41,28 +41,57 @@ void main(void)
     // Normalize the incoming N, L and V vectors
 
     vec3 bumpNormal = normalize(mat3(mv_matrix) * texture2D(normalTexture, fs_in.tc).xyz);
+	//bumpNormal = (bumpNormal-0.5) * 2.0; //changes the scale to -1, 1
 	vec3 vertexNormal = normalize(fs_in.N);
 
 	vec3 N = vec3(0,0,0);
 
-	bool xIsLargest = (vertexNormal.x > vertexNormal.y) && (vertexNormal.x > vertexNormal.z);
-	bool yIsLargest = (vertexNormal.y > vertexNormal.x) && (vertexNormal.y > vertexNormal.z);
-	bool zIsLargest = (vertexNormal.z > vertexNormal.x) && (vertexNormal.z > vertexNormal.y);
+	float absX = abs(vertexNormal.x);
+	float absY = abs(vertexNormal.y);
+	float absZ = abs(vertexNormal.z);
+
+	bool xIsLargest = (absX > absY) && (absX > absZ);
+	bool yIsLargest = (absY > absX) && (absY > absZ);
+	bool zIsLargest = (absZ > absX) && (absZ > absY);
+
+	float bumpX = bumpNormal.x;
+	float bumpY = bumpNormal.y;
+	float bumpZ = bumpNormal.z;
 
 	if (xIsLargest)
 	{
-		N = bumpNormal.zyx;
+		if (vertexNormal.x > 0)
+		{
+			N = vec3( bumpZ, bumpY, bumpX);
+		}
+		else
+		{
+			N = vec3(-bumpZ, bumpY, bumpX);
+		}
+		
 	}
 	else if (yIsLargest)
 	{
-		N = bumpNormal.xzy;
+		if (vertexNormal.y > 0)
+		{
+			N = vec3(bumpX,  bumpZ, bumpY);
+		}
+		else
+		{
+			N = vec3(bumpX, -bumpZ, bumpY);
+		}
 	}
 	else if (zIsLargest)
 	{
-		N = bumpNormal.xyz;
+		if (vertexNormal.z > 0)
+		{
+			N = vec3(bumpX, bumpY,  bumpZ);
+		}
+		else
+		{
+			N = vec3(bumpX, bumpY, -bumpZ);
+		}
 	}
-
-	N = bumpNormal.xyz;
 
     vec3 L = normalize(fs_in.L);
     vec3 V = normalize(fs_in.V);
@@ -78,11 +107,11 @@ void main(void)
 
 	//color =  vec4( (ambient + diffuse + specular) * texture(normalTexture, fs_in.tc).xyz, 1.0);
 
-	color = vec4( (ambient + diffuse + specular) * texture2D(colorTexture, fs_in.tc).xyz, 1.0);
-	
-	color = vec4(N, 1.0);
+	color = vec4( (ambient + diffuse + specular) * texture2D(colorTexture, fs_in.tc).xyz, 1.0); //The one I want
+
+	//color = vec4( float(xIsLargest), float(yIsLargest), float(zIsLargest), 1.0);
+
+	//color = vec4(N, 1.0);
 
 	//color = vec4(vertexNormal, 1.0);
-
-	//color = vec4(bumpNormal, 1.0);
 }
